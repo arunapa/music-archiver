@@ -2,8 +2,8 @@ SUPPORTED_FORMATS = (
     ".flac",
     ".mp3",
     ".m4a",
-    # ".wav",
-    # ".wma"
+    ".wav",
+    ".wma"
 )
 
 METADATA_CONTENTS = [
@@ -11,7 +11,9 @@ METADATA_CONTENTS = [
     "Title",
     "Album",
     "Artist(s)",
-    "Track Number",
+    "Track #",
+    # "Disc #",
+    "Duration",
     "Filepath",
 ]
 

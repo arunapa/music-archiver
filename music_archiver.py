@@ -7,12 +7,12 @@ and artist information from your local music library.
 '''
 
 import csv
-import mutagen
 import os
 
 from config import DEBUG_MODE_ON, METADATA_CONTENTS, OUTPUT_FILEPATH, SUPPORTED_FORMATS
+from tinytag import TinyTag
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 if __name__ == "__main__":
 
@@ -29,7 +29,7 @@ if __name__ == "__main__":
         "- Default metadata includes Title, Artist(s), Album, Filepath info",
         "- You can tweak default script configuration by modifying config.py",
         "",
-        "Disclaimer: This script uses mutagen library to read the ID3 metadata.",
+        "Disclaimer: This script uses tinytag library to read the ID3 metadata.",
         "If your audio files have missing metadata, this script will not be able",
         "to automatically recover it.",
         "--------------------------------------------------------------------",
@@ -58,21 +58,38 @@ if __name__ == "__main__":
 
                     if file.endswith(SUPPORTED_FORMATS):
                         try:
-                            m = mutagen.File(full_file_path, easy=True)
-
                             row = {}
-                            row["#"] = i
-                            row["Filepath"] = full_file_path
-                            row["Title"] = m["title"][0]
-                            row["Album"] = m["album"][0]
-                            row["Artist(s)"] = m["artist"][0]
-                            row["Track Number"] = m["tracknumber"][0]
+                            tag = TinyTag.get(full_file_path)
+                            
+                            if "#" in METADATA_CONTENTS:
+                                row["#"] = i
+                            
+                            if "Filepath" in METADATA_CONTENTS:
+                                row["Filepath"] = full_file_path
+
+                            if "Title" in METADATA_CONTENTS:
+                                row["Title"] = tag.title
+
+                            if "Album" in METADATA_CONTENTS:
+                                row["Album"] = tag.album
+
+                            if "Artist(s)" in METADATA_CONTENTS:
+                                row["Artist(s)"] = tag.artist
+
+                            if "Track #" in METADATA_CONTENTS:
+                                row["Track #"] = tag.track
+
+                            if "Disc #" in METADATA_CONTENTS:
+                                row["Disc #"] = tag.track
+
+                            if "Duration" in METADATA_CONTENTS:
+                                row["Duration"] = round(tag.duration)
 
                         except:
                             print(f"WARN: Some metadata may be missing for {full_file_path}")
                             
                             if DEBUG_MODE_ON:
-                                print(m)
+                                print(tag)
                                 print("")
                         
                         finally:
