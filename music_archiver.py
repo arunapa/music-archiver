@@ -44,39 +44,43 @@ if __name__ == "__main__":
 
     print("")
 
-    with open(OUTPUT_FILEPATH, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=METADATA_CONTENTS)
-        writer.writeheader()
+    try:
+        with open(OUTPUT_FILEPATH, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=METADATA_CONTENTS)
+            writer.writeheader()
 
-        i = 1
+            i = 1
 
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                full_file_path = os.path.join(root, file)
-                # filename, file_extension = os.path.splitext(full_file_path)
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    full_file_path = os.path.join(root, file)
+                    # filename, file_extension = os.path.splitext(full_file_path)
 
-                if file.endswith(SUPPORTED_FORMATS):
-                    try:
-                        m = mutagen.File(full_file_path, easy=True)
+                    if file.endswith(SUPPORTED_FORMATS):
+                        try:
+                            m = mutagen.File(full_file_path, easy=True)
 
-                        row = {}
-                        row["#"] = i
-                        row["Filepath"] = full_file_path
-                        row["Title"] = m["title"][0]
-                        row["Album"] = m["album"][0]
-                        row["Artist(s)"] = m["artist"][0]
-                        row["Track Number"] = m["tracknumber"][0]
+                            row = {}
+                            row["#"] = i
+                            row["Filepath"] = full_file_path
+                            row["Title"] = m["title"][0]
+                            row["Album"] = m["album"][0]
+                            row["Artist(s)"] = m["artist"][0]
+                            row["Track Number"] = m["tracknumber"][0]
 
-                    except:
-                        print(f"WARN: Some metadata may be missing for {full_file_path}")
+                        except:
+                            print(f"WARN: Some metadata may be missing for {full_file_path}")
+                            
+                            if DEBUG_MODE_ON:
+                                print(m)
+                                print("")
                         
-                        if DEBUG_MODE_ON:
-                            print(m)
-                            print("")
-                    
-                    finally:
-                        writer.writerow(row)
-                        i = i + 1
+                        finally:
+                            writer.writerow(row)
+                            i = i + 1
+        
+    except Exception as e:
+        print(f"ERROR: Unknown error occured. {e}")
 
     print(f"\nCompleted writing metadata to {OUTPUT_FILEPATH}!")
             
